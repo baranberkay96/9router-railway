@@ -84,7 +84,15 @@ Fixed by the launcher: `HOSTNAME=::`, `DATA_DIR=/app/data`, `HOME=/app/data/home
 
 ## Resource profile
 
-To be measured on Railway (see test results below).
+Measured on Railway (2026-11-14, pre-publish test project):
+
+| State | RAM | CPU |
+|---|---|---|
+| Idle after boot (model catalog loaded) | 0.09-0.12 GB | ~0 |
+| Burst: 600 requests, 20 parallel (`/v1/models` with 5,773 catalog entries, chat completions, `/login`) | 0.20 GB max | 0.39 vCPU max |
+| Same burst with a 0.5 GB / 1 vCPU limit (Free plan) | under the limit, all 450 requests answered, 0 restarts | — |
+
+Image: 303 MB compressed (amd64) plus a few KB of launcher, far below the 4 GB Trial/Free cap. Volume: under 10 MB for a fresh instance; grows with usage history. Estimated cost: about $1-2/month idle (0.1 GB RAM), a few dollars with steady use. Minimum plan: Free (0.5 GB) works.
 
 ## Verification checklist
 
@@ -100,3 +108,12 @@ To be measured on Railway (see test results below).
 
 - Railway's edge connects from a small set of addresses, so upstream's per-IP login lockout probably buckets all internet clients together; a burst of wrong passwords from anyone can pause logins for everyone for up to 30 minutes (API keys are unaffected).
 - Provider OAuth flows that redirect to `localhost` callbacks (upstream designs several for a local install) may need the manual copy-paste fallback on a hosted instance; not tested.
+
+## Test results
+
+Pre-publish (2026-11-14, probe template id, project deleted afterwards):
+
+- Build: launcher tests 18/18 in the Railway build; deploy SUCCESS, `/api/health` 200. Driver `better-sqlite3`, migration #1 applied.
+- Boot log: managed key added; self-check remote `/v1/models` without key 401, with key 200.
+- Hands-on over the public domain: `/dashboard` without session 307 to `/login`; `/api/keys` and `/api/settings` without session 401; `/v1/models` without key 401, wrong key 401, managed key 200 (Bearer and `x-api-key`); `POST /v1/chat/completions` without key 401, with key 404 "No active credentials for provider" (no provider connected, as expected); wrong password 401; `INITIAL_PASSWORD` 200 with an `auth_token` cookie (`Secure; HttpOnly; SameSite=lax`); `/dashboard` with the session 200; `/api/keys` lists only "Railway (NINEROUTER_API_KEY)" and it equals the variable.
+- Rule 29 on the same volume with `INITIAL_PASSWORD=short` and a 0.5 GB limit: deploy SUCCESS, warning logged, login with `short` refused (401), managed key unchanged and still valid (persistence across redeploy).

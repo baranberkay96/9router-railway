@@ -53,7 +53,7 @@ curl https://{your-domain}/v1/chat/completions \
 
 **Data.** The SQLite database (`/app/data/db/data.sqlite`, with automatic backups in `db/backups`) holds providers, OAuth tokens, keys, combos, settings and usage. Treat the volume and its backups as secrets. `HOME` also points into the volume, so nothing 9Router writes there is lost.
 
-**Resources.** Measured on Railway: about 0.25 GB RAM idle and up to about 0.3 GB while routing requests, with near-zero CPU at idle. It runs on every plan, including Trial (1 GB) and Free (0.5 GB). The image is about 0.3 GB compressed. Keep one replica: the SQLite volume cannot be shared. Responses sent through the public domain count as egress; use the private URL from other Railway services.
+**Resources.** Measured on Railway: about 0.1 GB RAM idle and 0.2 GB at most during a burst of 600 API and page requests (20 in parallel), with near-zero CPU at idle. It ran the same burst under a 0.5 GB limit without errors or restarts, so every plan works, including Trial (1 GB) and Free (0.5 GB). The image is about 0.3 GB compressed. Keep one replica: the SQLite volume cannot be shared. Responses sent through the public domain count as egress; use the private URL from other Railway services.
 
 **Pinning and upgrades.** The image is pinned by tag and digest in `services/9router/Dockerfile`. To upgrade, change it to a newer `decolua/9router` release digest, read the upstream changelog and redeploy; the volume carries your data over (9Router migrates its database on start). Optional extras such as the Headroom token-saver sidecar can be added as another service and pointed to with `HEADROOM_URL`.
 
