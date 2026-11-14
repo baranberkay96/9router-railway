@@ -1,0 +1,92 @@
+{
+  "name": "9Router Self-Hosted AI Router and Gateway",
+  "description": "OpenAI-compatible gateway for your own AI provider keys, with fallback.",
+  "category": "AI/ML",
+  "tags": [
+    "9router",
+    "ai-gateway",
+    "llm-router",
+    "openai-compatible",
+    "claude-code",
+    "codex",
+    "cursor",
+    "llm-proxy",
+    "model-fallback",
+    "ai-coding"
+  ],
+  "image": "https://cdn.jsdelivr.net/gh/decolua/9router@v0.5.116/public/favicon.svg",
+  "upstream": {
+    "9router": "decolua/9router v0.5.116 (tag 2026-11-08, commit 1339107e), Docker Hub image decolua/9router:0.5.116@sha256:12086f97857f784ab7762e95595f70d71279a7a60c800af0f100183e8da7ea36 (Node.js 22.23.4, Alpine)",
+    "checked": "2026-11-14"
+  },
+  "services": {
+    "9Router": {
+      "icon": "https://cdn.jsdelivr.net/gh/decolua/9router@v0.5.116/public/favicon.svg",
+      "source": {
+        "repo": "baranberkay96/9router-railway",
+        "rootDirectory": "/services/9router"
+      },
+      "startCommand": null,
+      "preDeployCommand": null,
+      "healthcheckPath": "/api/health",
+      "healthcheckTimeout": 300,
+      "restartPolicyType": "ALWAYS",
+      "numReplicas": 1,
+      "cronSchedule": null,
+      "publicDomain": true,
+      "targetPort": 20128,
+      "tcpProxy": null,
+      "volume": {
+        "mountPath": "/app/data"
+      },
+      "variables": {
+        "INITIAL_PASSWORD": {
+          "defaultValue": "${{secret(32, \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\")}}",
+          "description": "Dashboard login password, generated at deploy (12-128 chars). Used until you set a password in the dashboard.",
+          "required": true
+        },
+        "NINEROUTER_API_KEY": {
+          "defaultValue": "sk-${{secret(48, \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\")}}",
+          "description": "API key for /v1, generated at deploy and added to 9Router at boot. Empty removes it. 32-200 chars of A-Z a-z 0-9 . _ ~ -",
+          "required": false
+        },
+        "PORT": {
+          "defaultValue": "20128",
+          "description": "Port 9Router listens on (dual-stack); healthcheck and public domain target.",
+          "required": true
+        },
+        "JWT_SECRET": {
+          "defaultValue": "${{secret(64)}}",
+          "description": "Signs dashboard session cookies. Changing it signs everyone out.",
+          "required": false
+        },
+        "API_KEY_SECRET": {
+          "defaultValue": "${{secret(32)}}",
+          "description": "Secret 9Router uses for the checksum part of keys created in the dashboard.",
+          "required": false
+        },
+        "MACHINE_ID_SALT": {
+          "defaultValue": "${{secret(32)}}",
+          "description": "Salt for 9Router's instance id. Keep it stable after the first deploy.",
+          "required": false
+        },
+        "BASE_URL": {
+          "defaultValue": "https://${{RAILWAY_PUBLIC_DOMAIN}}",
+          "description": "Public URL of this instance (used for OIDC/SAML sign-in callbacks).",
+          "required": false
+        },
+        "NINEROUTER_PUBLIC_BASE_URL": {
+          "defaultValue": "https://${{RAILWAY_PUBLIC_DOMAIN}}/v1",
+          "description": "OpenAI-compatible base URL for clients outside Railway. Reference only; not read by 9Router.",
+          "required": false
+        },
+        "NINEROUTER_PRIVATE_BASE_URL": {
+          "defaultValue": "http://${{RAILWAY_PRIVATE_DOMAIN}}:${{PORT}}/v1",
+          "description": "Base URL for services in this project over the private network (no egress). Reference only.",
+          "required": false
+        }
+      }
+    }
+  },
+  "buckets": []
+}
