@@ -1,5 +1,7 @@
 # Deploy and Host 9Router with Railway
 
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/9router-self-hosted-ai-router-and-gatewa?referralCode=20H68q)
+
 9Router is an open-source AI router and gateway. It gives your coding tools and apps one OpenAI-compatible endpoint (plus Anthropic- and Gemini-style routes) and forwards each request to the provider accounts and API keys you connect, with format translation, model fallback and usage tracking. This template runs 9Router 0.5.116 with a password-protected dashboard and a ready-made API key.
 
 ## About Hosting 9Router
